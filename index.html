@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Imagine - Premium Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: #0f172a; color: white; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-4xl w-full glass p-8 rounded-[2.5rem] shadow-2xl">
+        <h1 class="text-4xl font-bold text-center mb-8 text-blue-500">AI Imagine <span class="text-white text-sm font-normal block">4th Project Demo</span></h1>
+        
+        <div class="grid md:grid-cols-2 gap-8">
+            <div class="space-y-4">
+                <textarea id="prompt" class="w-full bg-slate-800 p-4 rounded-2xl border border-white/10 focus:ring-2 focus:ring-blue-500 outline-none" rows="5" placeholder="আপনার কল্পনা এখানে লিখুন..."></textarea>
+                <select id="style" class="w-full bg-slate-800 p-3 rounded-xl border border-white/10">
+                    <option value="photorealistic">Realistic</option>
+                    <option value="cyberpunk">Cyberpunk</option>
+                    <option value="anime">Anime</option>
+                </select>
+                <button onclick="generate()" id="btn" class="w-full bg-blue-600 hover:bg-blue-700 py-4 rounded-2xl font-bold transition-all">Generate Image</button>
+            </div>
+
+            <div id="result" class="bg-slate-900 rounded-2xl flex items-center justify-center border-2 border-dashed border-white/10 overflow-hidden relative min-h-[300px]">
+                <p id="placeholder" class="text-slate-500">আপনার ছবি এখানে আসবে</p>
+                <img id="outputImg" class="hidden w-full h-full object-cover" src="">
+                <div id="loader" class="hidden animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function generate() {
+            const prompt = document.getElementById('prompt').value;
+            if(!prompt) return alert("প্রম্পট লিখুন!");
+            
+            document.getElementById('placeholder').classList.add('hidden');
+            document.getElementById('outputImg').classList.add('hidden');
+            document.getElementById('loader').classList.remove('hidden');
+            document.getElementById('btn').disabled = true;
+
+            const formData = new FormData();
+            formData.append('prompt', prompt);
+            formData.append('style', document.getElementById('style').value);
+
+            try {
+                const res = await fetch('/generate-image', { method: 'POST', body: formData });
+                const data = await res.json();
+                if(data.image_url) {
+                    document.getElementById('outputImg').src = data.image_url;
+                    document.getElementById('outputImg').classList.remove('hidden');
+                } else {
+                    alert(data.error);
+                }
+            } catch (e) { alert("সার্ভার এরর!"); }
+            
+            document.getElementById('loader').classList.add('hidden');
+            document.getElementById('btn').disabled = false;
+        }
+    </script>
+</body>
+</html>
